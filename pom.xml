@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.mycompany</groupId>
+    <artifactId>Serializador</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>20</maven.compiler.release>
+        <exec.mainClass>com.mycompany.serializador.Serializador</exec.mainClass>
+        <java.version>11</java.version>
+        <hadoop.version>3.3.4</hadoop.version>
+        <avro.version>1.11.1</avro.version>
+        <parquet.version>1.12.3</parquet.version>
+        <orc.version>1.7.0</orc.version>
+    </properties>
+    <dependencies>
+    <!-- Apache Avro -->
+        <dependency>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+          <version>${avro.version}</version>
+        </dependency>
+
+        <!-- Apache Parquet (Avro integration) -->
+        <dependency>
+          <groupId>org.apache.parquet</groupId>
+          <artifactId>parquet-avro</artifactId>
+          <version>${parquet.version}</version>
+        </dependency>
+
+        <!-- Apache ORC -->
+        <dependency>
+          <groupId>org.apache.orc</groupId>
+          <artifactId>orc-core</artifactId>
+          <version>${orc.version}</version>
+        </dependency>
+
+        <!-- Hadoop Common (para SequenceFile y utilidades) -->
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop.version}</version>
+        </dependency>
+
+        <!-- Hadoop HDFS Client (para acceder a HDFS) -->
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-hdfs-client</artifactId>
+          <version>${hadoop.version}</version>
+        </dependency>
+  </dependencies>
+
+</project>
