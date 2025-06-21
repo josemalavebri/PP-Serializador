@@ -6,11 +6,8 @@ package com.mycompany.serializador;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
@@ -19,9 +16,13 @@ import javax.swing.JTextArea;
 public class JF_Serializador extends javax.swing.JFrame {
     private String rutaEntrada = "";
     private String rutaSalida = "";
-    
+    private JFileChooser selector ;
+    private Serializacion serializacion;
+
     public JF_Serializador() {
         initComponents();
+        selector = new JFileChooser();
+        serializacion = new Serializacion();
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +66,7 @@ public class JF_Serializador extends javax.swing.JFrame {
             }
         });
 
-        cbx_formatoSerializacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "archivo.avro", ".parquet" }));
+        cbx_formatoSerializacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "archivo.avro", "archivo.parquet" }));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel1.setText("Formato de Serializacion");
@@ -179,14 +180,12 @@ public class JF_Serializador extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_archivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_archivoActionPerformed
-        JFileChooser selector = new JFileChooser();
         int resultado = selector.showOpenDialog(null);
-
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivo = selector.getSelectedFile();
             String ruta = archivo.getAbsolutePath(); 
-            System.out.println("Ruta del archivo: " + ruta);
             this.rutaEntrada = ruta;
+            System.out.println("Ruta del archivo: " + ruta);
             mostrarArchivoEnPanel(archivo, txtA_archivoTXT);
         }
     }//GEN-LAST:event_btn_archivoActionPerformed
@@ -207,9 +206,7 @@ public class JF_Serializador extends javax.swing.JFrame {
     
 
     private void btn_salidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_salidaActionPerformed
-        JFileChooser selector = new JFileChooser();
         selector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); 
-
         int resultado = selector.showOpenDialog(null);
  
         if (resultado == JFileChooser.APPROVE_OPTION) {
@@ -221,65 +218,50 @@ public class JF_Serializador extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_salidaActionPerformed
 
     private void btn_serializarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_serializarActionPerformed
-       
-        if(rutaSalida.isEmpty() &&rutaEntrada.isEmpty()){
-            return;
+        
+        if(!verificadorDeSeleccionDeRutas()){
+           return ; 
         }
         
-        txtA_archivoSerializado.setText("");
-        String rutaCompleta = "";
-        String formato = cbx_formatoSerializacion.getSelectedItem().toString();
-        rutaCompleta = rutaSalida + "\\" + formato;
-        System.out.println(rutaCompleta);
-        ApacheAvoSerializador serializador = new ApacheAvoSerializador();
-        boolean estaSerializado = serializador.serializar(rutaEntrada, rutaCompleta);
+        String rutaSalidaConFormato = crearRutaSalidaConFormato();
+        String tipo = cbx_formatoSerializacion.getSelectedItem().toString();
+        boolean estaSerializado = serializacion.serializar(tipo, rutaEntrada, rutaSalidaConFormato);
         if(estaSerializado){
             JOptionPane.showMessageDialog(null, "Serializado Correctamente");
         }
-        File archivoAvro = new File(rutaCompleta);
-        mostrarArchivoComoBinario(archivoAvro, txtA_archivoSerializado);
+        
+        File archivoAvro = new File(rutaSalidaConFormato);
+        mostrarArchivoComoBinario(archivoAvro);
 
     }//GEN-LAST:event_btn_serializarActionPerformed
-
     
-    public void mostrarArchivoComoBinario(File archivo, JTextArea areaTexto) {
-        try (FileInputStream fis = new FileInputStream(archivo)) {
-            StringBuilder builder = new StringBuilder();
-            int b;
-            while ((b = fis.read()) != -1) {
-                builder.append(String.format("%8s", Integer.toBinaryString(b)).replace(' ', '0')).append(" ");
-            }
-            areaTexto.setText(builder.toString());
-        } catch (IOException e) {
-            areaTexto.setText("Error leyendo archivo binario: " + e.getMessage());
+    private boolean verificadorDeSeleccionDeRutas(){
+        if(rutaEntrada.isEmpty()){
+            JOptionPane.showMessageDialog(null, "Seleccione una ruta de salida");
+            return false;
+        } else if(rutaSalida.isEmpty() ){
+            JOptionPane.showMessageDialog(null, "Seleccione una ruta de salida");
+            return false;
         }
+        return false;
     }
-
+    
+    private String crearRutaSalidaConFormato(){
+        String rutaSalidaConFormato= "";
+        txtA_archivoSerializado.setText("");
+        String formato = cbx_formatoSerializacion.getSelectedItem().toString();
+        rutaSalidaConFormato = rutaSalida + "\\" + formato;
+        System.out.println(rutaSalidaConFormato);
+        return rutaSalidaConFormato;
+    }
+    
+    public void mostrarArchivoComoBinario(File archivo) {
+        ConvertidorArchivoBinario convertidor = new ConvertidorArchivoBinario();
+        StringBuilder builder = convertidor.convertir(archivo);
+        txtA_archivoSerializado.setText(builder.toString());
+    }
+    
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JF_Serializador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JF_Serializador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JF_Serializador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JF_Serializador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new JF_Serializador().setVisible(true);
